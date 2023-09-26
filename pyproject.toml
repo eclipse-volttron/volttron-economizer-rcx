@@ -57,9 +57,6 @@ isort = "^5.10.1"
 Sphinx = "^4.5.0"
 sphinx-rtd-theme = "^1.0.0"
 
-[tool.poetry.scripts]
-volttron-actuator = "actuator.agent:main"
-
 [tool.yapf]
 based_on_style = "pep8"
 spaces_before_comment = 4
