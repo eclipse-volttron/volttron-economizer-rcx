@@ -1,25 +1,26 @@
 {
     "application": "economizer.economizer_rcx.Application",
     "device": {
-        "campus": "campus",
-        "building": "building",
+        "campus": "PNNL",
+        "building": "LargeOffice",
         "unit": {
-            "rtu4": {
-                "subdevices": []
+            "AHU4": {
+                "subdevices": [
+                    "Perimeter_top_ZN_1", "Perimeter_top_ZN_2", "Perimeter_top_ZN_3", "Perimeter_top_ZN_4"
+                ]
             }
-        }
     },
     "analysis_name": "Economizer_AIRCx",
     "actuation_mode": "PASSIVE",
     "arguments": {
         "point_mapping": {
-            "supply_fan_status": "FanStatus",
-            "outdoor_air_temperature": "outsideairtemp",
-            "return_air_temperature": "ReturnAirTemp",
-            "mixed_air_temperature": "MixedAirTemp",
-            "outdoor_damper_signal": "Damper",
-            "cool_call": "CompressorStatus",
-            "supply_fan_speed": "SupplyFanSpeed"
+            "supply_fan_status": "SupplyFanStatus",
+            "outdoor_air_temperature": "OutdoorAirTemperature",
+            "return_air_temperature": "ReturnAirTemperature",
+            "mixed_air_temperature": "MixedAirTemperature",
+            "outdoor_damper_signal": "",
+            "cool_call": "",
+            "supply_fan_speed": ""
         },
         "device_type": "rtu",
         "data_window": 1,

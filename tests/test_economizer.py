@@ -1,60 +1,36 @@
-"""
-Copyright (c) 2020, Battelle Memorial Institute
-All rights reserved.
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met:
-1. Redistributions of source code must retain the above copyright notice, this
-   list of conditions and the following disclaimer.
-2. Redistributions in binary form must reproduce the above copyright notice,
-   this list of conditions and the following disclaimer in the documentation
-   and/or other materials provided with the distribution.
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
-ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-The views and conclusions contained in the software and documentation are those
-of the authors and should not be interpreted as representing official policies,
-either expressed or implied, of the FreeBSD Project.
-This material was prepared as an account of work sponsored by an agency of the
-United States Government. Neither the United States Government nor the United
-States Department of Energy, nor Battelle, nor any of their employees, nor any
-jurisdiction or organization that has cooperated in th.e development of these
-materials, makes any warranty, express or implied, or assumes any legal
-liability or responsibility for the accuracy, completeness, or usefulness or
-any information, apparatus, product, software, or process disclosed, or
-represents that its use would not infringe privately owned rights.
-Reference herein to any specific commercial product, process, or service by
-trade name, trademark, manufacturer, or otherwise does not necessarily
-constitute or imply its endorsement, recommendation, or favoring by the
-United States Government or any agency thereof, or Battelle Memorial Institute.
-The views and opinions of authors expressed herein do not necessarily state or
-reflect those of the United States Government or any agency thereof.
+# -*- coding: utf-8 -*- {{{
+# ===----------------------------------------------------------------------===
+#
+#                 Installable Component of Eclipse VOLTTRON
+#
+# ===----------------------------------------------------------------------===
+#
+# Copyright 2022 Battelle Memorial Institute
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not
+# use this file except in compliance with the License. You may obtain a copy
+# of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+# ===----------------------------------------------------------------------===
+# }}}
 
-PACIFIC NORTHWEST NATIONAL LABORATORY
-operated by BATTELLE for the UNITED STATES DEPARTMENT OF ENERGY
-under Contract DE-AC05-76RL01830
-"""
-
-"""
-File used to unit test EconimizerRC
-"""
 import unittest
-import os
-import sys
-from datetime import timedelta as td
-from .diagnostics.TemperatureSensor import TemperatureSensor
-from .diagnostics.TemperatureSensor import DamperSensorInconsistency
-from .diagnostics.EconCorrectlyOff import EconCorrectlyOff
-from .diagnostics.EconCorrectlyOn import EconCorrectlyOn
-from .diagnostics.ExcessOutsideAir import ExcessOutsideAir
-from .diagnostics.InsufficientOutsideAir import InsufficientOutsideAir
-from datetime import datetime
+
+from datetime import datetime, timedelta as td
+
+from economizer.diagnostics.EconCorrectlyOff import EconCorrectlyOff
+from economizer.diagnostics.EconCorrectlyOn import EconCorrectlyOn
+from economizer.diagnostics.ExcessOutsideAir import ExcessOutsideAir
+from economizer.diagnostics.InsufficientOutsideAir import InsufficientOutsideAir
+from economizer.diagnostics.TemperatureSensor import DamperSensorInconsistency, TemperatureSensor
 
 
 class TestDiagnosticsTempSensor(unittest.TestCase):
@@ -222,10 +198,10 @@ class TestDiagnosticsDamperSensorInconsistency(unittest.TestCase):
         damp_sensor.mat_values.append(25)
         damp_sensor.steady_state = first_stamp
         damp_sensor.damper_algorithm(50, 25, 100, cur_time)
-        assert len(damp_sensor.timestamp) == 0
-        assert damp_sensor.steady_state is None
-        assert len(damp_sensor.oat_values) == 0
-        assert len(damp_sensor.mat_values) == 0
+        assert len(damp_sensor.timestamp) == 2
+        assert damp_sensor.steady_state == first_stamp
+        assert len(damp_sensor.oat_values) == 2
+        assert len(damp_sensor.mat_values) == 2
 
     def test_damp_sensor_clear_data(self):
         """test the damp sensor clear data"""
@@ -322,12 +298,12 @@ class TestDiagnosticsEconCorrectlyOff(unittest.TestCase):
         results = []
         econ.set_class_values("test", results, data_window, 1, 20.0, 10.0, 6000.0, 10.0)
         first_stamp = datetime.fromtimestamp(1)
-        econ.economizing = first_stamp
+        econ.economizing.append(first_stamp)
         econ.oat_values.append(50)
         econ.mat_values.append(25)
         econ.oad_values.append(100)
         econ.rat_values.append(50)
-        ret = econ.economizer_conditions(5.0, cur_time)
+        ret = econ.economizer_conditions(cur_time)
         assert len(econ.oat_values) == 0
         assert len(econ.mat_values) == 0
         assert len(econ.rat_values) == 0
@@ -336,37 +312,28 @@ class TestDiagnosticsEconCorrectlyOff(unittest.TestCase):
         assert len(econ.timestamp) == 0
         assert ret is True
 
-    def test_econ_conditions_no_clear(self):
-        """test the econ conditions without clearing method"""
+    def test_econ_conditions_false(self):
+        """test the econ conditions returning false"""
         econ = EconCorrectlyOff()
         data_window = td(minutes=1)
         cur_time = datetime.fromtimestamp(10000)
         results = []
         econ.set_class_values("test", results, data_window, 1, 20.0, 10.0, 6000.0, 10.0)
         first_stamp = datetime.fromtimestamp(100000)
-        econ.economizing = first_stamp
+        econ.economizing.append(first_stamp)
+        econ.econ_timestamp.extend([first_stamp, first_stamp + data_window, first_stamp + data_window * 2])
         econ.oat_values.append(50)
         econ.mat_values.append(25)
         econ.oad_values.append(100)
         econ.rat_values.append(50)
         econ.fan_spd_values.append(50)
-        ret = econ.economizer_conditions(5.0, cur_time)
+        ret = econ.economizer_conditions(cur_time)
         assert len(econ.oat_values) == 1
         assert len(econ.mat_values) == 1
         assert len(econ.rat_values) == 1
         assert len(econ.oad_values) == 1
         assert len(econ.fan_spd_values) == 1
         assert len(econ.timestamp) == 0
-        assert ret is True
-
-    def test_econ_conditions_false(self):
-        """test the econ conditions method returning false"""
-        econ = EconCorrectlyOff()
-        data_window = td(minutes=1)
-        cur_time = datetime.fromtimestamp(10000)
-        results = []
-        econ.set_class_values("test", results, data_window, 1, 20.0, 10.0, 6000.0, 10.0)
-        ret = econ.economizer_conditions(False, cur_time)
         assert ret is False
 
     def test_econ_when_not_needed(self):
@@ -377,7 +344,7 @@ class TestDiagnosticsEconCorrectlyOff(unittest.TestCase):
         econ.set_class_values("test", results, data_window, 1, 20.0, 10.0, 6000.0, 10.0)
         first_stamp = datetime.fromtimestamp(1)
         econ.timestamp.append(first_stamp)
-        econ.economizing = first_stamp
+        econ.economizing.append(first_stamp)
         econ.oat_values.append(50)
         econ.mat_values.append(25)
         econ.oad_values.append(100)
@@ -398,7 +365,7 @@ class TestDiagnosticsEconCorrectlyOff(unittest.TestCase):
         econ.set_class_values("test", results, data_window, 1, 20.0, 10.0, 6000.0, 10.0)
         first_stamp = datetime.fromtimestamp(1)
         econ.timestamp.append(first_stamp)
-        econ.economizing = first_stamp
+        econ.economizing.append(first_stamp)
         econ.oat_values.append(10)
         econ.mat_values.append(20)
         econ.oad_values.append(10)
@@ -415,7 +382,7 @@ class TestDiagnosticsEconCorrectlyOff(unittest.TestCase):
         econ.set_class_values("test", results, data_window, 1, 20.0, 10.0, 6000.0, 10.0)
         first_stamp = datetime.fromtimestamp(1)
         econ.timestamp.append(first_stamp)
-        econ.economizing = first_stamp
+        econ.economizing.append(first_stamp)
         econ.oat_values.append(1)
         econ.mat_values.append(1)
         econ.oad_values.append(1)
@@ -432,7 +399,7 @@ class TestDiagnosticsEconCorrectlyOff(unittest.TestCase):
         econ.set_class_values("test", results, data_window, 1, 20.0, 10.0, 6000.0, 10.0)
         first_stamp = datetime.fromtimestamp(1)
         econ.timestamp.append(first_stamp)
-        econ.economizing = first_stamp
+        econ.economizing.append(first_stamp)
         econ.oat_values.append(10)
         econ.mat_values.append(20)
         econ.oad_values.append(10)
@@ -516,12 +483,13 @@ class TestDiagnosticsEconCorrectlyOn(unittest.TestCase):
         results = []
         econ.set_class_values("test", results, data_window, 1, 20.0, 80.0, 6000.0, 10.0)
         econ.economizer_on_algorithm(True, 50.0, 25.0, 50.0, 25.0, 5.0, cur_time, 36)
-        assert len(econ.oat_values) == 0
-        assert len(econ.mat_values) == 0
-        assert len(econ.rat_values) == 0
-        assert len(econ.oad_values) == 0
-        assert len(econ.fan_spd_values) == 0
-        assert len(econ.timestamp) == 0
+        assert len(econ.oat_values) == 1
+        assert len(econ.mat_values) == 1
+        assert len(econ.rat_values) == 1
+        assert len(econ.oad_values) == 1
+        assert len(econ.fan_spd_values) == 1
+        assert econ.fan_spd_values[0] == 0.36
+        assert len(econ.timestamp) == 2
 
     def test_econ_on_conditions(self):
         """test the econ conditions method"""
@@ -530,52 +498,41 @@ class TestDiagnosticsEconCorrectlyOn(unittest.TestCase):
         cur_time = datetime.fromtimestamp(10000)
         results = []
         econ.set_class_values("test", results, data_window, 1, 20.0, 80.0, 6000.0, 10.0)
-        first_stamp = datetime.fromtimestamp(1)
-        econ.not_cooling = first_stamp
+        econ.not_cooling.append(datetime.fromtimestamp(1))
         econ.oat_values.append(50)
         econ.mat_values.append(25)
         econ.oad_values.append(100)
         econ.rat_values.append(50)
-        ret = econ.economizer_conditions(False, 5.0, cur_time)
+        ret = econ.economizer_conditions(cur_time)
         assert len(econ.oat_values) == 0
         assert len(econ.mat_values) == 0
         assert len(econ.rat_values) == 0
         assert len(econ.oad_values) == 0
         assert len(econ.fan_spd_values) == 0
         assert len(econ.timestamp) == 0
-        assert ret is False
+        assert ret is True
 
-    def test_econ_on_conditions_no_clear(self):
-        """test the econ conditions without clearing method"""
+    def test_econ_on_conditions_false(self):
+        """test the econ conditions returning false"""
         econ = EconCorrectlyOn()
         data_window = td(minutes=1)
         cur_time = datetime.fromtimestamp(10000)
         results = []
         econ.set_class_values("test", results,  data_window, 1, 20.0, 80.0, 6000.0, 10.0)
         first_stamp = datetime.fromtimestamp(100000)
-        econ.economizing = first_stamp
+        econ.econ_timestamp.append(first_stamp)
         econ.oat_values.append(50)
         econ.mat_values.append(25)
         econ.oad_values.append(100)
         econ.rat_values.append(50)
         econ.fan_spd_values.append(50)
-        ret = econ.economizer_conditions(True, 5.0, cur_time)
+        ret = econ.economizer_conditions(cur_time)
         assert len(econ.oat_values) == 1
         assert len(econ.mat_values) == 1
         assert len(econ.rat_values) == 1
         assert len(econ.oad_values) == 1
         assert len(econ.fan_spd_values) == 1
         assert len(econ.timestamp) == 0
-        assert ret is True
-
-    def test_econ_on_conditions_false(self):
-        """test the econ conditions method returning false"""
-        econ = EconCorrectlyOn()
-        data_window = td(minutes=1)
-        cur_time = datetime.fromtimestamp(10000)
-        results = []
-        econ.set_class_values("test", results, data_window, 1, 20.0, 80.0, 6000.0, 10.0)
-        ret = econ.economizer_conditions(False, 0, cur_time)
         assert ret is False
 
     def test_econ_on_not_economizing_when_needed(self):
@@ -742,13 +699,20 @@ class TestDiagnosticsExcessOutsideAir(unittest.TestCase):
         cur_time = datetime.fromtimestamp(10000)
         results = []
         air.set_class_values("test", results, data_window, 1, 20.0, 10.0, 6000.0, 10.0)
-        air.excess_ouside_air_algorithm(50.0, 25.0, 50.0, 25.0, 0.0, cur_time, 36)
         assert len(air.oat_values) == 0
         assert len(air.mat_values) == 0
         assert len(air.rat_values) == 0
         assert len(air.oad_values) == 0
         assert len(air.fan_spd_values) == 0
-        assert len(air.timestamp) == 0
+        assert len(air.timestamp) == 1
+        air.excess_ouside_air_algorithm(50.0, 25.0, 50.0, 25.0, 0.0, cur_time, 36)
+        assert len(air.oat_values) == 1
+        assert len(air.mat_values) == 1
+        assert len(air.rat_values) == 1
+        assert len(air.oad_values) == 1
+        assert len(air.fan_spd_values) == 1
+        assert len(air.timestamp) == 2
+        assert air.fan_spd_values[0] == 0.36
 
     def test_econ_conditions(self):
         """test the econ conditions method"""
@@ -758,13 +722,13 @@ class TestDiagnosticsExcessOutsideAir(unittest.TestCase):
         results = []
         air.set_class_values("test", results, data_window, 1, 20.0, 10.0, 6000.0, 10.0)
         first_stamp = datetime.fromtimestamp(1)
-        air.economizing = first_stamp
+        air.economizing.append(first_stamp)
         air.timestamp.append(first_stamp)
         air.oat_values.append(50)
         air.mat_values.append(25)
         air.oad_values.append(100)
         air.rat_values.append(50)
-        ret = air.economizer_conditions(5.0, cur_time)
+        ret = air.economizer_conditions(cur_time)
         assert len(air.oat_values) == 0
         assert len(air.mat_values) == 0
         assert len(air.rat_values) == 0
@@ -773,37 +737,27 @@ class TestDiagnosticsExcessOutsideAir(unittest.TestCase):
         assert len(air.timestamp) == 0
         assert ret is True
 
-    def test_econ_conditions_no_clear(self):
-        """test the econ conditions without clearing method"""
+    def test_econ_conditions_false(self):
+        """test the econ conditions returning false"""
         air = ExcessOutsideAir()
         data_window = td(minutes=1)
         cur_time = datetime.fromtimestamp(10000)
         results = []
         air.set_class_values("test", results, data_window, 1, 20.0, 10.0, 6000.0, 10.0)
-        first_stamp = datetime.fromtimestamp(100000)
-        air.economizing = first_stamp
+        air.economizing.append(datetime.fromtimestamp(100000))
+        air.econ_timestamp.extend([datetime.fromtimestamp(100000), datetime.fromtimestamp(100000), datetime.fromtimestamp(100000)])
         air.oat_values.append(50)
         air.mat_values.append(25)
         air.oad_values.append(100)
         air.rat_values.append(50)
         air.fan_spd_values.append(50)
-        ret = air.economizer_conditions(5.0, cur_time)
+        ret = air.economizer_conditions(cur_time)
         assert len(air.oat_values) == 1
         assert len(air.mat_values) == 1
         assert len(air.rat_values) == 1
         assert len(air.oad_values) == 1
         assert len(air.fan_spd_values) == 1
         assert len(air.timestamp) == 0
-        assert ret is True
-
-    def test_econ_conditions_false(self):
-        """test the econ conditions method returning false"""
-        air = ExcessOutsideAir()
-        data_window = td(minutes=1)
-        cur_time = datetime.fromtimestamp(10000)
-        results = []
-        air.set_class_values("test", results, data_window, 1, 20.0, 10.0, 6000.0, 10.0)
-        ret = air.economizer_conditions(False, cur_time)
         assert ret is False
 
     def test_excess_oa_method(self):
@@ -962,20 +916,23 @@ class TestDiagnosticsInsufficientOutsideAir(unittest.TestCase):
         assert len(air.rat_values) == 1
         assert len(air.timestamp) == 1
 
-    def test_insufficient_ouside_air_algorithm_two_timestamps(self):
+    def test_insufficient_outside_air_algorithm_two_timestamps(self):
         """test the Insufficient_outside_air algorithm"""
         air = InsufficientOutsideAir()
         data_window = td(minutes=1)
         first_stamp = datetime.fromtimestamp(1)
-        air.timestamp.append(first_stamp)
         cur_time = datetime.fromtimestamp(10000)
         results = []
         air.set_class_values("test", results, data_window, 1, 10.0)
-        air.insufficient_outside_air_algorithm(100.0, 50.0, 50.0, cur_time)
         assert len(air.oat_values) == 0
         assert len(air.mat_values) == 0
         assert len(air.rat_values) == 0
         assert len(air.timestamp) == 0
+        air.insufficient_outside_air_algorithm(100.0, 50.0, 50.0, cur_time)
+        assert len(air.oat_values) == 1
+        assert len(air.mat_values) == 1
+        assert len(air.rat_values) == 1
+        assert len(air.timestamp) == 1
 
     def test_insufficient_ouside_air_oa(self):
         """test the Insufficient_outside_air insufficient oa method"""

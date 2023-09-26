@@ -1,69 +1,48 @@
-"""
-Copyright (c) 2020, Battelle Memorial Institute
-All rights reserved.
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met:
-1. Redistributions of source code must retain the above copyright notice, this
-   list of conditions and the following disclaimer.
-2. Redistributions in binary form must reproduce the above copyright notice,
-   this list of conditions and the following disclaimer in the documentation
-   and/or other materials provided with the distribution.
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
-ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-The views and conclusions contained in the software and documentation are those
-of the authors and should not be interpreted as representing official policies,
-either expressed or implied, of the FreeBSD Project.
-This material was prepared as an account of work sponsored by an agency of the
-United States Government. Neither the United States Government nor the United
-States Department of Energy, nor Battelle, nor any of their employees, nor any
-jurisdiction or organization that has cooperated in th.e development of these
-materials, makes any warranty, express or implied, or assumes any legal
-liability or responsibility for the accuracy, completeness, or usefulness or
-any information, apparatus, product, software, or process disclosed, or
-represents that its use would not infringe privately owned rights.
-Reference herein to any specific commercial product, process, or service by
-trade name, trademark, manufacturer, or otherwise does not necessarily
-constitute or imply its endorsement, recommendation, or favoring by the
-United States Government or any agency thereof, or Battelle Memorial Institute.
-The views and opinions of authors expressed herein do not necessarily state or
-reflect those of the United States Government or any agency thereof.
-
-PACIFIC NORTHWEST NATIONAL LABORATORY
-operated by BATTELLE for the UNITED STATES DEPARTMENT OF ENERGY
-under Contract DE-AC05-76RL01830
-"""
+# -*- coding: utf-8 -*- {{{
+# ===----------------------------------------------------------------------===
+#
+#                 Installable Component of Eclipse VOLTTRON
+#
+# ===----------------------------------------------------------------------===
+#
+# Copyright 2022 Battelle Memorial Institute
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not
+# use this file except in compliance with the License. You may obtain a copy
+# of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+# ===----------------------------------------------------------------------===
+# }}}
 
 import sys
 import logging
 from datetime import timedelta as td
 from dateutil import parser
 import dateutil.tz
-from volttron.platform.agent import utils
-from volttron.platform.messaging import (headers as headers_mod, topics)
-from volttron.platform.agent.math_utils import mean
-from volttron.platform.agent.utils import setup_logging
-from volttron.platform.vip.agent import Agent, Core
 
-from . import constants
-from . diagnostics.TemperatureSensor import TemperatureSensor
-from . diagnostics.EconCorrectlyOn import EconCorrectlyOn
-from . diagnostics.EconCorrectlyOff import EconCorrectlyOff
-from . diagnostics.ExcessOutsideAir import ExcessOutsideAir
-from . diagnostics.InsufficientOutsideAir import InsufficientOutsideAir
+from volttron.client.messaging import (headers as headers_mod, topics)
+from volttron.client.vip.agent import Agent, Core
+from volttron.utils import load_config, setup_logging, vip_main
+from volttron.utils.math_utils import mean
 
-__version__ = "2.0.0"
+from economizer import constants
+from economizer.diagnostics.TemperatureSensor import TemperatureSensor
+from economizer.diagnostics.EconCorrectlyOn import EconCorrectlyOn
+from economizer.diagnostics.EconCorrectlyOff import EconCorrectlyOff
+from economizer.diagnostics.ExcessOutsideAir import ExcessOutsideAir
+from economizer.diagnostics.InsufficientOutsideAir import InsufficientOutsideAir
 
 setup_logging()
 _log = logging.getLogger(__name__)
-logging.basicConfig(level=logging.debug, format='%(asctime)s   %(levelname)-8s %(message)s',
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s   %(levelname)-8s %(message)s',
                     datefmt='%m-%d-%y %H:%M:%S')
 
 
@@ -100,7 +79,7 @@ class EconomizerAgent(Agent):
         self.publish_list = []
         self.units = []
         self.arguments = []
-        self.point_mapping = []
+        self.point_mapping = {}
         self.damper_data = []
         self.oat_data = []
         self.mat_data = []
@@ -181,7 +160,7 @@ class EconomizerAgent(Agent):
         Use volttrons config reader to grab and parse out configuration file
         config_path: The path to the agents configuration file
         """
-        file_config = utils.load_config(config_path)
+        file_config = load_config(config_path)
         default_config = self.setup_default_config()
         if file_config:
             self.config = file_config
@@ -344,14 +323,6 @@ class EconomizerAgent(Agent):
                 "rated_cfm": 6000.0,
                 "eer": 10.0,
                 "temp_band": 1.0
-            },
-            "conversion_map": {
-                ".*Temperature": "float",
-                ".*Command": "float",
-                ".*Signal": "float",
-                "SupplyFanStatus": "int",
-                "Cooling.*": "float",
-                "SupplyFanSpeed": "int"
             }
         }
         return default_config
@@ -764,10 +735,10 @@ class EconomizerAgent(Agent):
         self.results_publish.clear()
 
 
-def main(argv=sys.argv):
+def main(argv:type(sys.argv)):
     """Main method called by the app."""
     try:
-        utils.vip_main(EconomizerAgent)
+        vip_main(EconomizerAgent)
     except Exception as exception:
         _log.exception("unhandled exception")
         _log.error(repr(exception))
@@ -776,6 +747,6 @@ def main(argv=sys.argv):
 if __name__ == "__main__":
     """Entry point for script"""
     try:
-        sys.exit(main())
+        sys.exit(main(argv=sys.argv))
     except KeyboardInterrupt:
         pass
