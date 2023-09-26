@@ -735,7 +735,7 @@ class EconomizerAgent(Agent):
         self.results_publish.clear()
 
 
-def main(argv:type(sys.argv)):
+def main():
     """Main method called by the app."""
     try:
         vip_main(EconomizerAgent)
@@ -747,6 +747,6 @@ def main(argv:type(sys.argv)):
 if __name__ == "__main__":
     """Entry point for script"""
     try:
-        sys.exit(main(argv=sys.argv))
+        sys.exit(main())
     except KeyboardInterrupt:
         pass
