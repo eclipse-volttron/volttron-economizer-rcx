@@ -1,0 +1,47 @@
+{
+    "application": "economizer.economizer_rcx.Application",
+    "device": {
+        "campus": "PNNL",
+        "building": "LargeOffice",
+        "unit": {
+            "AHU4": {
+                "subdevices": [
+                    "Perimeter_top_ZN_1", "Perimeter_top_ZN_2", "Perimeter_top_ZN_3", "Perimeter_top_ZN_4"
+                ]
+            }
+    },
+    "analysis_name": "Economizer_AIRCx",
+    "actuation_mode": "PASSIVE",
+    "arguments": {
+        "point_mapping": {
+            "supply_fan_status": "SupplyFanStatus",
+            "outdoor_air_temperature": "OutdoorAirTemperature",
+            "return_air_temperature": "ReturnAirTemperature",
+            "mixed_air_temperature": "MixedAirTemperature",
+            "outdoor_damper_signal": "",
+            "cool_call": "",
+            "supply_fan_speed": ""
+        },
+        "device_type": "rtu",
+        "data_window": 1,
+        "no_required_data": 1,
+        "open_damper_time": 0,
+        "low_supply_fan_threshold": 20.0,
+        "mat_low_threshold": 50.0,
+        "mat_high_threshold": 90.0,
+        "oat_low_threshold": 30.0,
+        "oat_high_threshold": 100.0,
+        "rat_low_threshold": 50.0,
+        "rat_high_threshold": 90.0,
+        "temp_difference_threshold": 4.0,
+        "open_damper_threshold": 90.0,
+        "oaf_temperature_threshold": 4.0,
+        "cooling_enabled_threshold": 5.0,
+        "minimum_damper_setpoint": 10.0,
+        "desired_oaf": 10.0,
+        "rated_cfm": 1000.0,
+        "eer": 10.0,
+        "economizer_type": "DDB",
+        "temp_band": 1.0
+    }
+}
