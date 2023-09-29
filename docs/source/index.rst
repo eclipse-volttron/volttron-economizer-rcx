@@ -52,22 +52,23 @@ Featured Diagnostics
 Running Agent
 -------------
 
-The agent is an installed Volttron agent. Sample command line for creating the agent
+The agent is an installed Volttron agent. Sample command line for configuring and installing the agent from PyPi,
+using the vip-identity "economizer.ahu1":
 
-.. code-block:: python
+.. code-block:: bash
 
-   python scripts/install-agent.py -s /path/to/economizer/agent
-   -i economizer -c /path/to/economizer/confi --start --force
+   vctl config store economizer.ahu1 config <path/to/config/file>
+   vctl install volttron-economizer-rcx --vip-identity economizer.ahu1 --tag economizer --start
 
 
 Sample Data
 -----------
-Sample data for running the Economizer is included in the economizer/sampledata directory
+Sample data for running the Economizer is included in the sample_data directory
 
 
 Python Testing
 --------------
-1. **Start Volttron Platform** - ./start-volttron from inside Volttron home
+1. **Start Volttron Platform**
 2. **Enable the Volttron Environment** - source env/bin/activate
 3. **Run Pytest From inside the economizer agent directory** - pytest ./test.py
 
@@ -78,7 +79,7 @@ Configuration Options
 The following JSON configuration file shows all the options currently supported
 by this agent. A sample configuration is included with the agent
 
-.. code-block:: python
+.. code-block:: json
 
     {
         "application": "economizer.economizer_rcx.Application",

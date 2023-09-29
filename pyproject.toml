@@ -17,14 +17,14 @@ show_error_codes = true
 exclude = ['docs/']
 
 [tool.poetry]
-name = "volttron-app-economizer-rcx"
+name = "volttron-economizer-rcx"
 version = "2.1.0"
 description = "Economizer Agent helps in the re-tuning process and addresses some of the issues associated with RCx. RCx is known to save energy consumption , but the process used is not cost-effective.  Economizer Agent and it's diagnostics allow continuous re-tuning and problem identification which can lower the costs of RCx"
 authors = ["VOLTTRON Team <volttron@pnnl.gov>"]
 license = "Apache License 2.0"
-readme = "README.rst"
-repository = "https://github.com/eclipse-volttron/volttron-app-economizer-rcx"
-homepage = "https://github.com/eclipse-volttron/volttron-app-economizer-rcx"
+readme = "README.md"
+repository = "https://github.com/eclipse-volttron/volttron-economizer-rcx"
+homepage = "https://github.com/eclipse-volttron/volttron-economizer-rcx"
 keywords = []
 packages = [ { include = "economizer", from = "src" } ]
 classifiers = [
@@ -58,7 +58,7 @@ Sphinx = "^4.5.0"
 sphinx-rtd-theme = "^1.0.0"
 
 [tool.poetry.scripts]
-volttron-app-economizer-rcx = "economizer.economizer_agent:main"
+volttron-economizer-rcx = "economizer.economizer_agent:main"
 
 [tool.yapf]
 based_on_style = "pep8"
