@@ -70,7 +70,7 @@ Python Testing
 --------------
 1. **Start Volttron Platform**
 2. **Enable the Volttron Environment** - source env/bin/activate
-3. **Run Pytest From inside the economizer agent directory** - pytest ./test.py
+3. **Run Pytest From inside the economizer agent directory** - pytest tests/
 
 
 Configuration Options
