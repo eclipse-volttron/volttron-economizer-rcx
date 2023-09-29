@@ -3,7 +3,7 @@
 ![Eclipse VOLTTRON 10.0.4rc](https://img.shields.io/badge/Eclipse%20VOLTTRON-10.0.4rc-red.svg)
 ![Python 3.10](https://img.shields.io/badge/python-3.10-blue.svg)
 ![Python 3.11](https://img.shields.io/badge/python-3.11-blue.svg)
-[![Passing?](https://github.com/eclipse-volttron/volttron-economizer-rcx/actions/workflows/run-tests.yml/badge.svg)](https://github.com/VOLTTRON/volttron-economizer-rcx/actions/workflows/run-tests.yml)
+[![Passing?](https://github.com/eclipse-volttron/volttron-economizer-rcx/actions/workflows/run-tests.yml/badge.svg)](https://github.com/eclipse-volttron/volttron-economizer-rcx/actions/workflows/run-tests.yml)
 [![pypi version](https://img.shields.io/pypi/v/volttron-economizer-rcx.svg)](https://pypi.org/project/volttron-economizer-rcx/)
 
 Economizer Agent helps in the re-tuning process and addresses some of the issues
