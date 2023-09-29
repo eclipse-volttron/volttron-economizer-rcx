@@ -4,7 +4,13 @@ on:
   push:
     branches:
     - develop
-
+  workflow_dispatch:
+    inputs:
+      release_version:
+        description: 'Version number to use(NO v in it) If provided bump-rule will be ignored'
+        required: false
+        default: ''
+        type: string
 defaults:
   run:
     shell: bash
@@ -78,6 +84,7 @@ jobs:
     # bump version number for patch
     #----------------------------------------------
     - name: Bump Version
+      if: "${{ github.event.inputs.release_version == '' }}"
       run: |
         # current_tag is the last tagged release in the repository.
         # From there we need to remove the 'v' from the beginning of the tag.
@@ -99,7 +106,22 @@ jobs:
         # steps we set a NEW_TAG environmental variable
         NEW_TAG=v$(poetry version --short)
         echo "NEW_TAG=$(echo ${NEW_TAG})" >> $GITHUB_ENV
+        
+    - name: Set version
+      if: "${{ github.event.inputs.release_version != '' }}"
+      run: |
+        current_tag=${{ github.event.inputs.release_version }}
+        
+        # current_tag is now the version we want to set our poetry version so
+        # that we can bump the version
+        poetry version ${current_tag}
+        poetry version prerelease --no-interaction
 
+        # Finally because we want to be able to use the variable in later
+        # steps we set a NEW_TAG environmental variable
+        NEW_TAG=v$(poetry version --short)
+        echo "NEW_TAG=$(echo ${NEW_TAG})" >> $GITHUB_ENV
+        
     #---------------------------------------------------------------
     # create build artifacts to be included as part of release
     #---------------------------------------------------------------
