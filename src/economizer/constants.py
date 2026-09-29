@@ -22,7 +22,12 @@
 # ===----------------------------------------------------------------------===
 # }}}
 
-from volttron.utils.jsonapi import dumps
+from importlib.metadata import distribution, PackageNotFoundError
+try:
+    distribution('volttron-core')
+    from volttron.utils.jsonapi import dumps
+except PackageNotFoundError:
+    from volttron.platform.jsonapi import dumps
 
 ECON1 = "Temperature Sensor Dx"
 ECON2 = "Not Economizing When Unit Should Dx"

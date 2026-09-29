@@ -28,10 +28,19 @@ from datetime import timedelta as td
 from dateutil import parser
 import dateutil.tz
 
-from volttron.client.messaging import (headers as headers_mod, topics)
-from volttron.client.vip.agent import Agent, Core
-from volttron.utils import load_config, setup_logging, vip_main
-from volttron.utils.math_utils import mean
+from importlib.metadata import distribution, PackageNotFoundError
+try:
+    distribution('volttron-core')
+    from volttron.client.logs import setup_logging
+    from volttron.client.messaging import (headers as headers_mod, topics)
+    from volttron.client.vip.agent import Agent, Core
+    from volttron.utils import load_config, vip_main
+    from volttron.utils.math_utils import mean
+except PackageNotFoundError:
+    from volttron.platform.agent.utils import load_config, setup_logging, vip_main
+    from volttron.platform.agent.math_utils import mean
+    from volttron.platform.messaging import (headers as headers_mod, topics)
+    from volttron.platform.vip.agent import Agent, Core
 
 from economizer import constants
 from economizer.diagnostics.TemperatureSensor import TemperatureSensor
@@ -42,8 +51,6 @@ from economizer.diagnostics.InsufficientOutsideAir import InsufficientOutsideAir
 
 setup_logging()
 _log = logging.getLogger(__name__)
-logging.basicConfig(level=logging.DEBUG, format='%(asctime)s   %(levelname)-8s %(message)s',
-                    datefmt='%m-%d-%y %H:%M:%S')
 
 
 class EconomizerAgent(Agent):
